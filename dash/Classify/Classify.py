@@ -31,7 +31,9 @@ def classify_sequence(name):
 	distanceList = tree.getDistanceByName(name)
 	taxon = ''
 	top_score = 0.0
-	
+	score = max([float(x) for x in distanceList])
+	score = statistics.median([float(x) for x in distanceList])
+	print(k,score,sorted(distanceList,reverse=True))
 
 
 
