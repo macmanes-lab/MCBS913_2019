@@ -25,6 +25,3 @@ class Node:
 	#append the distance
 	def addDistance(self,distance):
 		self._distance.append(distance)
-
-
-

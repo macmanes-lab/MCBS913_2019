@@ -1,6 +1,7 @@
 #! python3
 import copy
 from Node import Node
+import queue
 
 
 class Tree:
@@ -78,7 +79,7 @@ class Tree:
 	#add helper function, recursivly find the position to insert the node
 	def addHelper(self,index,query,parent,distance):
 		if index == len(query):
-			parent.addDistance(distance)
+			parent.addDistance(float(distance))
 			return
 		node = parent.getChildren().get(query[index])
 
@@ -86,14 +87,14 @@ class Tree:
 			newNode = Node(query[index])
 			self.totalNodes[query[index]] = newNode
 			parent.addChild(newNode.getName(),newNode)
-			parent.addDistance(distance)
+			parent.addDistance(float(distance))
 			self._size += 1
 			index += 1
 			self.addHelper(index,query,newNode,distance)
 			return
 
 		else:
-			parent.addDistance(distance)
+			parent.addDistance(float(distance))
 			index += 1
 			self.addHelper(index,query,node,distance)
 			return
@@ -143,3 +144,32 @@ class Tree:
 			print("No such element")
 		else:
 			return node.getDistance()
+
+	#level order traversal. To go throught every node,
+	#print out the children name which has highest distance value
+	def getMaxDistFromChildren(self):
+		q = queue.Queue()
+		for k,v in self._root.getChildren().items():
+			q.put(v)
+		print("=======================================================")
+		print("Patten: Parent: maxDistance : children with max distance")
+		print("=======================================================")
+		print("")
+		while q.empty() == False:
+			size = q.qsize()
+			for x in range(size):
+				node = q.get()
+				if len(node.getChildren()) == 0:
+					continue
+				print(node.getName(),' :',end = " ")
+				maxSocre = 0.0
+
+				nameList = []
+				for subK,subV in node.getChildren().items():
+					distanceList = subV.getDistance()
+					score  = max(distanceList)
+					if score >= maxSocre:
+						maxSocre = score
+						nameList.append(subK)
+					q.put(subV)
+				print(" ",str(maxSocre)," : ",nameList)

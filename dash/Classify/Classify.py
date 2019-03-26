@@ -57,7 +57,8 @@ def main():
 	#print(tree.getDistanceByName("Eukaryota"))
 	totalNodes = {}
 	totalNodes = tree.getTotalNodes()
-	classify_sequence(totalNodes)
+	#classify_sequence(totalNodes)
+	tree.getMaxDistFromChildren()
 
 	#tree.printTree()
 
