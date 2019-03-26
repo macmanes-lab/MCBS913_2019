@@ -13,11 +13,11 @@ class Tree:
 		self._size = 0
 		self.totalPath = []
 		self.dir = {}
-	
+
 
 	#print out the tree by all paths from root to leaf
 	def printTree(self):
-		
+
 		print("============================Print tree")
 		allPath = []
 		path = []
@@ -48,7 +48,7 @@ class Tree:
 
 		#print(root.getName())
 		childrenList = root.getChildren()
-		if len(childrenList) == 0: 
+		if len(childrenList) == 0:
 			allPath.append(copy.deepcopy(path))
 			return
 
@@ -56,7 +56,7 @@ class Tree:
 			path.append(v.getName())
 			self.DFS(v,allPath,path)
 			path.pop()
-		
+
 
 	#return the root node
 	def getRoot():
@@ -69,7 +69,7 @@ class Tree:
 	#return a specific tree node by name
 	def getNode(self,name):
 		return totalNodes.get(name)
-	
+
 	#add node to the tree. argument include the query list and the query list's distance
 	def add(self,query,distance):
 
@@ -96,9 +96,9 @@ class Tree:
 			parent.addDistance(distance)
 			index += 1
 			self.addHelper(index,query,node,distance)
-			return 
+			return
 
-	#testing function. 
+	#testing function.
 	# def testFuc(self):
 	# 	for k,v in self.totalNodes["Eukaryota"].getChildren().items():
 	# 		print(k,end=" ")
@@ -138,25 +138,8 @@ class Tree:
 
 		return distanceDir
 	def getDistanceByName(self,name):
-		node = self.totalNodes.get(name)
+		node = self.totalNodes[name]
 		if node == None:
 			print("No such element")
 		else:
 			return node.getDistance()
-
-		
-
-		
-
-
-
-
-
-	
-				
-
-
-
-			
-		
-		

@@ -27,7 +27,7 @@ def classify_sequence(totalNodes):
 
 	return taxon
 
-def classify_sequence(name):
+def classify_sequenceByName(name):
 	distanceList = tree.getDistanceByName(name)
 	taxon = ''
 	top_score = 0.0
