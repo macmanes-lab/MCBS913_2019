@@ -25,3 +25,6 @@ class Node:
 	#append the distance
 	def addDistance(self,distance):
 		self._distance.append(distance)
+
+	def getMaxDistance(self):
+		return max(self._distance)

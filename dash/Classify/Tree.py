@@ -147,6 +147,10 @@ class Tree:
 
 	#level order traversal. To go throught every node,
 	#print out the children name which has highest distance value
+
+
+
+
 	def getMaxDistFromChildren(self):
 		q = queue.Queue()
 		for k,v in self._root.getChildren().items():
@@ -173,3 +177,17 @@ class Tree:
 						nameList.append(subK)
 					q.put(subV)
 				print(" ",str(maxSocre)," : ",nameList)
+
+	def getMaxDistPath(self):
+
+		node = self._root
+		maxDistance = 0
+		path = {}
+		distance = {}
+		while node.getChildren() != None:
+			for k,v in node.getChildren().items():
+				if v.getMaxDistance() > maxDistance:
+					node = v
+					maxDistance =  v.getMaxDistance()
+					path.append(v.getName())
+					distance.append(v.getMaxDistance())
