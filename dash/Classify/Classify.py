@@ -55,13 +55,14 @@ def main():
 		processQuery(query,distance)
 
 	#print(tree.getDistanceByName("Eukaryota"))
-	totalNodes = {}
-	totalNodes = tree.getTotalNodes()
+	# totalNodes = {}
+	# totalNodes = tree.getTotalNodes()
 	#classify_sequence(totalNodes)
-	tree.getMaxDistFromChildren()
-
+	#tree.getMaxDistFromChildren()
+	print("getting max path")
+	tree.getMaxDistPath()
 	#tree.printTree()
-
+	
 
 	# treePathDir = tree.getPathDir()
 	# treeAllPath = tree.getAllPath()

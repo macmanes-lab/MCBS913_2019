@@ -182,12 +182,23 @@ class Tree:
 
 		node = self._root
 		maxDistance = 0
-		path = {}
-		distance = {}
-		while node.getChildren() != None:
+		path = []
+		distance = []
+		while len(node.getChildren()) != 0:
+			# print(path);
+			#print(len(node.getChildren()))
 			for k,v in node.getChildren().items():
+
 				if v.getMaxDistance() > maxDistance:
 					node = v
 					maxDistance =  v.getMaxDistance()
-					path.append(v.getName())
-					distance.append(v.getMaxDistance())
+
+
+			path.append(node.getName())
+			distance.append(maxDistance)
+			maxDistance = 0
+			#print(node.getName())
+
+		print(path);
+		# print(distance)
+		return path
