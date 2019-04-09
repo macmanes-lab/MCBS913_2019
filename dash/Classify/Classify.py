@@ -2,12 +2,17 @@
 import sys, os
 import statistics
 import argparse
+import time
 from Bio import SeqIO
 from Tree import Tree
 from Node import Node
 from Dash import Dash
 
 #tree = Tree()
+
+
+full_start = time.time()
+
 
 
 def fillTaxonomyLookup(tax_path):
@@ -61,14 +66,20 @@ def main():
     target_genome_path = os.path.abspath(args.target)
 
     # Parse taxonomy lookup
+    start = time.time()
     print("\nParsing taxonomy database")
     taxonomy_lookup = fillTaxonomyLookup(args.tax_lookup)
+    print("Time", time.time() - start)
 
     # Sketch the input directory
-    print("\nSketching starting database")
+    start = time.time()
+    print("\nSketching starting database (this may take some time... unless its been done before)")
     Dash.sketch_database(args.database)
+    print("Time", time.time() - start)
 
+    # Potential to multithread
     for seq_record in SeqIO.parse(target_genome_path, "fasta"):
+        start = time.time()
         cur_tree = Tree()
         # grab sequence information
         header = seq_record.id
@@ -79,26 +90,29 @@ def main():
         file_handle = open(temp_file, 'w')
         file_handle.writelines('>' + header + '\n' + sequence + '\n')
         file_handle.close()
+        print("Time", time.time() - start)
 
         # sketch the new file
         print("Sketching a contig")
         temp_sketch = Dash.sketch_file(temp_file)
+        print("Time", time.time() - start)
 
         # iterate through the database and calculate distance with dashing
         print("\nDashing contig against database")
         directory_path = os.path.abspath(args.database)
-
+        print("Time", time.time() - start)
         # PYTHON Threadpool
 
         out_file = open('my_distances.txt', 'w')
 
+        # Multithread
         for genome in [directory_path + '/' + x for x in os.listdir(directory_path) if not x.endswith('hll')]:
-
-            # right here is when a new tree needs to be created, and delete the old tree.
 
             name = genome.split('/')[-1]
             dist_t = Dash.run_dashing(temp_file, genome)
             distance = dist_t.split('\n')[4].split('\t')[2]
+            # print (temp_file, genome)
+            # print (dist_t)
 
             # Determine taxonomy data
             tax_id = name.split('_')[2]
@@ -113,7 +127,7 @@ def main():
 
             # Add data to classifying tree
             #print (reduced_taxonomy, distance)
-            out_file.writelines(':'.join(reduced_taxonomy) + '\t' + str(distance) + '\n')
+            out_file.writelines(header + '\t' + genome + '\t' + ':'.join(reduced_taxonomy) + '\t' + str(distance) + '\n')
             processQuery(reduced_taxonomy, distance, cur_tree)
 
             # output.writelines((temp_file + ',' + name + ',' + dist + '\n'))
@@ -126,50 +140,7 @@ def main():
         os.remove(temp_sketch)
         os.remove(temp_file)
 
-        sys.exit()
-
-    output.close()
-
-
-    fileName = sys.argv[1]
-    original = []
-    count = 1
-    for line in open(fileName):
-        distance,full_tax = line.rstrip().split('\t')
-        query = full_tax.split(':')[1:]
-        #print(distance,query)
-        count+=1
-        original.append(query)
-        processQuery(query,distance)
-
-    #print(tree.getDistanceByName("Eukaryota"))
-    totalNodes = {}
-    totalNodes = tree.getTotalNodes()
-    #classify_sequence(totalNodes)
-    tree.getMaxDistFromChildren()
-
-    #tree.printTree()
-
-
-    # treePathDir = tree.getPathDir()
-    # treeAllPath = tree.getAllPath()
-
-    # checking(original,treePathDir,treeAllPath)
-    # diff = 0
-    # for x in original:
-
-    # 	flag = tree.check(x)
-    # 	if flag ==False:
-    # 		diff += 1
-
-    # for x in original:
-    # 	print(x)
-    # 	tmp = tree.getDistance(x)
-    # 	for k,v in tmp.items():
-    # 		print(k,v)
-
-    # print(diff)
-    # tree.testFuc()
+    out_file.close()
 
 if __name__== "__main__":
     main()
