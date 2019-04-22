@@ -248,19 +248,33 @@ class Tree:
     def getLevel(self):
         return self._levels
 
+
+
     def randomPick(self,N):
         if self._levelFlag == False:
             self.generateLevel()
-            self._levelFlag == True
+            self._levelFlag = True
 
         return self.randomPickHelper(self._root,N)
+
+    def pick(self,pickedList,targetDir):
+        pickedName = random.choice(list(targetDir))
+        if pickedName in pickedList:
+            for i in range(len(list(targetDir))):
+                pickedName = random.choice(list(targetDir))
+                if pickedName not in pickedList:
+                    pickedList[pickedName] = targetDir.get(pickedName)
+                    break
+        else:
+            pickedList[pickedName] = targetDir.get(pickedName)
+
 
     def randomPickHelper(self,node,N):
         if self._levelFlag == False:
             self.generateLevel()
-            self._levelFlag == True
+            self._levelFlag = True
 
-        pickedList = []
+        pickedList = {}
 
         q = Queue()
         q.put((node,N))
@@ -268,16 +282,22 @@ class Tree:
             size = q.qsize()
 
             for i in range(size):
-                item, target = q.get()
+                item,target = q.get()
 
-                print(item.getName())
+                # print(item.getName())
                 childNum = item.childrenSize()
+                if childNum == 0:
+                    continue
 
+                count = childNum
+                left = target
+                #assign target to each child
                 if childNum <= target:
                     remainder = target % childNum
                     unit = target // childNum
 
                     for childName, childNode in item.getChildren().items():
+                        count -= 1
 
                         if remainder > 0:
                             tmp = unit + 1
@@ -286,64 +306,73 @@ class Tree:
                         else:
                             tmp = unit
 
+                        #stop condition
                         if childNode.getLevel() == self._levels -2:
 
-                            if(childNode.leafSize() <= tmp):
+                            if childNode.leafSize() == tmp:
                                 for k, v in childNode.getLeafDir().items():
-                                    if pickedList.contains(k):
+                                    if k in pickedList.keys():
                                         continue
-                                    pickedList.append(k)
-                            else:
-                                for i in range(tmp):
-                                    pickedName = random.choice(list(childNode.getLeafDir()))
+                                    pickedList[k] = v
+                                    left -= 1
+                            elif childNode.leafSize() < tmp:
+                                left -= childNode.leafSize
 
-                                    if pickedName in pickedList:
-                                        for i in range(len(list(childNode.getLeafDir()))):
-                                            pickedName = random.choice(list(childNode.getLeafDir()))
-                                            if pickedName not in pickedList:
-                                                pickedList.append((pickedName))
-                                                break
-                                    else:
-                                        pickedList.append(pickedName)
+                                # re-assgin
+                                if count > 0:
+                                    remainder = left % count
+                                    unit = left // count
+
+                                for k, v in childNode.getLeafDir().items():
+                                    if k in pickedList.keys():
+                                        left += 1
+                                        continue
+                                    pickedList[k] = v
+                            else:
+
+                                left -= tmp
+                                for i in range(tmp):
+                                    self.pick(pickedList,childNode.getLeafDir())
                             continue
 
-                        if childNode.leafSize() <= tmp:
+                        if childNode.leafSize() == tmp:
 
                             for k,v in childNode.getLeafDir().items():
-                                if pickedList.contains(k):
+                                if k in pickedList.keys():
                                     continue
-                                pickedList.append(k)
+                                pickedList[k] = v
+                                left -= 1
+
+                        elif childNode.leafSize() < tmp:
+                            left -= childNode.leafSize
+
+                            #re-assgin
+
+                            if count > 0:
+                                remainder = left % count
+                                unit = left // count
+
+                            for k,v in childNode.getLeafDir().items():
+                                if k in pickedList.keys():
+                                    left +=1
+                                    continue
+                                pickedList[k] = v
+
+
                         else:
                             q.put((childNode,tmp))
+
                 #randomly pick target
                 else:
 
                     if item.getLevel() == self._levels - 2:
                         for i in range(min(target,childNum)):
-                            pickedName = random.choice(list(item.getLeafDir()))
-                            if pickedName in pickedList:
-                                for i in range(len(list(item.getLeafDir()))):
-                                    pickedName = random.choice(list(item.getLeafDir()))
-                                    if pickedName not in pickedList:
-                                        pickedList.append((pickedName))
-                                        break
-                            else:
-                                pickedList.append(pickedName)
+                            self.pick(pickedList,item.getLeafDir())
 
                     elif item.getLevel() == self._levels -1 :
                         continue
                     else:
                         for i in range(target):
-                            # tmpList = item.getChildren()
                             tmpNode = item.getChildren().get(random.choice(list(item.getChildren())))
-
-                            pickedName = random.choice(list(tmpNode.getLeafDir()))
-                            if pickedName in pickedList:
-                                for i in range(len(list(tmpNode.getLeafDir()))):
-                                    pickedName = random.choice(list(tmpNode.getLeafDir()))
-                                    if pickedName not in pickedList:
-                                        pickedList.append((pickedName))
-                                        break
-                            else:
-                                pickedList.append(pickedName)
+                            self.pick(pickedList,tmpNode.getLeafDir())
         return pickedList
