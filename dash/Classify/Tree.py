@@ -24,8 +24,6 @@ class Tree:
 
     # print out the tree by all paths from root to leaf
     def printTree(self):
-
-        print("============================Print tree")
         allPath = []
         path = []
         self.DFS(self._root,allPath,path)
@@ -35,6 +33,19 @@ class Tree:
         # 	self.dir[''.join(x)] = 0
         for x in self.totalPath:
             print(x)
+    # Help function of print the tree. Impemented by Depth first search recursivly
+    def DFS(self,root,allPath,path):
+        #print(type(root))
+        #print(root.getName())
+        childrenList = root.getChildren()
+        if len(childrenList) == 0:
+            allPath.append(copy.deepcopy(path))
+            return
+
+        for k,v in childrenList.items():
+            path.append(v.getName())
+            self.DFS(v,allPath,path)
+            path.pop()
 
     # return all paths as a directory
     def getPathDir(self):
@@ -48,21 +59,6 @@ class Tree:
     def getTotalNodes(self):
         return self.totalNodes
 
-
-    # Help function of print the tree. Impemented by Depth first search recursivly
-    def DFS(self,root,allPath,path):
-        #print(type(root))
-
-        #print(root.getName())
-        childrenList = root.getChildren()
-        if len(childrenList) == 0:
-            allPath.append(copy.deepcopy(path))
-            return
-
-        for k,v in childrenList.items():
-            path.append(v.getName())
-            self.DFS(v,allPath,path)
-            path.pop()
 
 
     # return the root node
@@ -84,28 +80,18 @@ class Tree:
 
     # add node to the tree. argument include the query list and the query list's distance
     def add(self,query,distance):
-
         self.addHelper(0,query,self._root,distance)
-
         querySize = len(query)
-
         # exe = ThreadPoolExecutor(max_workers=1)
         global leafName
         leafName = query[querySize-1]
         global leafNode
         leafNode = self.totalNodes.get(leafName)
 
-        #print(leafName)
-        # for fur in exe.map(self.multiThreadingAddLeaf,query):
-        #     pass
-
         node = self._root
-
         for index in range(0,querySize-1):
             node = node.getChildren().get(query[index])
             node.addLeaf(leafName,leafNode)
-
-
     # add helper function, recursivly find the position to insert the node
     def addHelper(self,index,query,parent,distance):
         if index == len(query):
@@ -118,6 +104,9 @@ class Tree:
             self.totalNodes[query[index]] = newNode
             parent.addChild(newNode.getName(),newNode)
             parent.addDistance(float(distance))
+
+            #add parent to new node
+            newNode.setParent(parent)
             self._size += 1
             index += 1
             self.addHelper(index,query,newNode,distance)
@@ -275,7 +264,6 @@ class Tree:
             self._levelFlag = True
 
         pickedList = {}
-
         q = Queue()
         q.put((node,N))
         while not q.empty():
@@ -302,13 +290,10 @@ class Tree:
                         if remainder > 0:
                             tmp = unit + 1
                             remainder -= 1
-
                         else:
                             tmp = unit
-
                         #stop condition
                         if childNode.getLevel() == self._levels -2:
-
                             if childNode.leafSize() == tmp:
                                 for k, v in childNode.getLeafDir().items():
                                     if k in pickedList.keys():
@@ -357,8 +342,6 @@ class Tree:
                                     left +=1
                                     continue
                                 pickedList[k] = v
-
-
                         else:
                             q.put((childNode,tmp))
 
@@ -376,3 +359,38 @@ class Tree:
                             tmpNode = item.getChildren().get(random.choice(list(item.getChildren())))
                             self.pick(pickedList,tmpNode.getLeafDir())
         return pickedList
+
+    def findWinnerNode(self,leafDir):
+
+        return None
+
+    def findRightParent(self,root,leaf):
+
+        parent = leaf.getParent()
+
+        while parent.getParent() != root:
+            parent = parent.getParent()
+
+        return parent
+
+
+    def findPath(self):
+        path = {}
+        root = self._root
+        
+        #is the N fixed?
+        N = 15
+        while root.getLevel() != self.getLevel()-2 :
+            leafDir = self.randomPickHelper(root,N)
+
+            winnerNode = self.findWinnerNode(leafDir)
+
+            #find the parent right under root
+            parentNode = self.findRightParent(root,winnerNode)
+
+            path[parentNode.getName()] = parentNode
+
+            root = parentNode
+
+
+        return path
