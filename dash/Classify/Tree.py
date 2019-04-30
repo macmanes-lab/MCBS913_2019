@@ -1,7 +1,12 @@
 #! python3
+from __future__ import division
+
 import copy
 from Node import Node
-import queue
+from queue import Queue
+from concurrent.futures import ThreadPoolExecutor
+import random
+import time
 
 
 class Tree:
@@ -9,17 +14,16 @@ class Tree:
     # to initial necessary vairable
     def __init__(self):
         self._root = Node("root")
-        self.totalNodes = {}
-        self.totalNodes["_root"] = self._root
+        self.totalNodes = {"_root": self._root}
         self._size = 0
         self.totalPath = []
         self.dir = {}
+        self._levelFlag = False
+        self._levels = 0
 
 
     # print out the tree by all paths from root to leaf
     def printTree(self):
-
-        print("============================Print tree")
         allPath = []
         path = []
         self.DFS(self._root,allPath,path)
@@ -29,6 +33,19 @@ class Tree:
         # 	self.dir[''.join(x)] = 0
         for x in self.totalPath:
             print(x)
+    # Help function of print the tree. Impemented by Depth first search recursivly
+    def DFS(self,root,allPath,path):
+        #print(type(root))
+        #print(root.getName())
+        childrenList = root.getChildren()
+        if len(childrenList) == 0:
+            allPath.append(copy.deepcopy(path))
+            return
+
+        for k,v in childrenList.items():
+            path.append(v.getName())
+            self.DFS(v,allPath,path)
+            path.pop()
 
     # return all paths as a directory
     def getPathDir(self):
@@ -43,24 +60,9 @@ class Tree:
         return self.totalNodes
 
 
-    # Help function of print the tree. Impemented by Depth first search recursivly
-    def DFS(self,root,allPath,path):
-        #print(type(root))
-
-        #print(root.getName())
-        childrenList = root.getChildren()
-        if len(childrenList) == 0:
-            allPath.append(copy.deepcopy(path))
-            return
-
-        for k,v in childrenList.items():
-            path.append(v.getName())
-            self.DFS(v,allPath,path)
-            path.pop()
-
 
     # return the root node
-    def getRoot():
+    def getRoot(self):
         return self._root
 
     # return tree size: how many tree node in this tree
@@ -69,13 +71,27 @@ class Tree:
 
     # return a specific tree node by name
     def getNode(self,name):
-        return totalNodes.get(name)
+        return self.totalNodes.get(name)
+
+    def multiThreadingAddLeaf(self,nodeName):
+        node = self.totalNodes.get(nodeName)
+        node.addLeaf(leafName, leafNode)
+
 
     # add node to the tree. argument include the query list and the query list's distance
     def add(self,query,distance):
-
         self.addHelper(0,query,self._root,distance)
+        querySize = len(query)
+        # exe = ThreadPoolExecutor(max_workers=1)
+        global leafName
+        leafName = query[querySize-1]
+        global leafNode
+        leafNode = self.totalNodes.get(leafName)
 
+        node = self._root
+        for index in range(0,querySize-1):
+            node = node.getChildren().get(query[index])
+            node.addLeaf(leafName,leafNode)
     # add helper function, recursivly find the position to insert the node
     def addHelper(self,index,query,parent,distance):
         if index == len(query):
@@ -88,6 +104,9 @@ class Tree:
             self.totalNodes[query[index]] = newNode
             parent.addChild(newNode.getName(),newNode)
             parent.addDistance(float(distance))
+
+            #add parent to new node
+            newNode.setParent(parent)
             self._size += 1
             index += 1
             self.addHelper(index,query,newNode,distance)
@@ -149,7 +168,7 @@ class Tree:
     # level order traversal. To go throught every node,
     # print out the children name which has highest distance value
     def getMaxDistFromChildren(self):
-        q = queue.Queue()
+        q = Queue()
         for k,v in self._root.getChildren().items():
             q.put(v)
         print("=======================================================")
@@ -197,4 +216,181 @@ class Tree:
 
         print(path);
         # print(distance)
+        return path
+
+    def generateLevel(self):
+        q = Queue()
+
+        q.put(self._root)
+
+        while not q.empty():
+            self._levels += 1
+            size = q.qsize()
+            for i in range(size):
+
+                item = q.get()
+
+                for k,v in item.getChildren().items():
+                    v.setLevel(self._levels)
+                    q.put(v)
+
+    def getLevel(self):
+        return self._levels
+
+
+
+    def randomPick(self,N):
+        if self._levelFlag == False:
+            self.generateLevel()
+            self._levelFlag = True
+
+        return self.randomPickHelper(self._root,N)
+
+    def pick(self,pickedList,targetDir):
+        pickedName = random.choice(list(targetDir))
+        if pickedName in pickedList:
+            for i in range(len(list(targetDir))):
+                pickedName = random.choice(list(targetDir))
+                if pickedName not in pickedList:
+                    pickedList[pickedName] = targetDir.get(pickedName)
+                    break
+        else:
+            pickedList[pickedName] = targetDir.get(pickedName)
+
+
+    def randomPickHelper(self,node,N):
+        if self._levelFlag == False:
+            self.generateLevel()
+            self._levelFlag = True
+
+        pickedList = {}
+        q = Queue()
+        q.put((node,N))
+        while not q.empty():
+            size = q.qsize()
+
+            for i in range(size):
+                item,target = q.get()
+
+                # print(item.getName())
+                childNum = item.childrenSize()
+                if childNum == 0:
+                    continue
+
+                count = childNum
+                left = target
+                #assign target to each child
+                if childNum <= target:
+                    remainder = target % childNum
+                    unit = target // childNum
+
+                    for childName, childNode in item.getChildren().items():
+                        count -= 1
+
+                        if remainder > 0:
+                            tmp = unit + 1
+                            remainder -= 1
+                        else:
+                            tmp = unit
+                        #stop condition
+                        if childNode.getLevel() == self._levels -2:
+                            if childNode.leafSize() == tmp:
+                                for k, v in childNode.getLeafDir().items():
+                                    if k in pickedList.keys():
+                                        continue
+                                    pickedList[k] = v
+                                    left -= 1
+                            elif childNode.leafSize() < tmp:
+                                left -= childNode.leafSize
+
+                                # re-assgin
+                                if count > 0:
+                                    remainder = left % count
+                                    unit = left // count
+
+                                for k, v in childNode.getLeafDir().items():
+                                    if k in pickedList.keys():
+                                        left += 1
+                                        continue
+                                    pickedList[k] = v
+                            else:
+
+                                left -= tmp
+                                for i in range(tmp):
+                                    self.pick(pickedList,childNode.getLeafDir())
+                            continue
+
+                        if childNode.leafSize() == tmp:
+
+                            for k,v in childNode.getLeafDir().items():
+                                if k in pickedList.keys():
+                                    continue
+                                pickedList[k] = v
+                                left -= 1
+
+                        elif childNode.leafSize() < tmp:
+                            left -= childNode.leafSize
+
+                            #re-assgin
+
+                            if count > 0:
+                                remainder = left % count
+                                unit = left // count
+
+                            for k,v in childNode.getLeafDir().items():
+                                if k in pickedList.keys():
+                                    left +=1
+                                    continue
+                                pickedList[k] = v
+                        else:
+                            q.put((childNode,tmp))
+
+                #randomly pick target
+                else:
+
+                    if item.getLevel() == self._levels - 2:
+                        for i in range(min(target,childNum)):
+                            self.pick(pickedList,item.getLeafDir())
+
+                    elif item.getLevel() == self._levels -1 :
+                        continue
+                    else:
+                        for i in range(target):
+                            tmpNode = item.getChildren().get(random.choice(list(item.getChildren())))
+                            self.pick(pickedList,tmpNode.getLeafDir())
+        return pickedList
+
+    def findWinnerNode(self,leafDir):
+
+        return None
+
+    def findRightParent(self,root,leaf):
+
+        parent = leaf.getParent()
+
+        while parent.getParent() != root:
+            parent = parent.getParent()
+
+        return parent
+
+
+    def findPath(self):
+        path = {}
+        root = self._root
+        
+        #is the N fixed?
+        N = 15
+        while root.getLevel() != self.getLevel()-2 :
+            leafDir = self.randomPickHelper(root,N)
+
+            winnerNode = self.findWinnerNode(leafDir)
+
+            #find the parent right under root
+            parentNode = self.findRightParent(root,winnerNode)
+
+            path[parentNode.getName()] = parentNode
+
+            root = parentNode
+
+
         return path
