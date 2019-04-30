@@ -1,5 +1,5 @@
 #! python3
-import sys, os
+import sys, os, glob
 import statistics
 import argparse
 import time
@@ -15,6 +15,14 @@ from BLAST import BLAST
 
 full_start = time.time()
 
+
+# function to retrieve taxonomy information from file names, may change depending on database structure
+def tax_from_file(file_name, tax_lookup):
+    tax_id = file_name.split('_')[2]
+    taxonomy = tax_lookup[tax_id]
+    seven_levels = [0, 1, 2, 5, 8, 10, 12, 13]
+    seven_levels_taxonomy = [taxonomy.split(';')[x] for x in seven_levels]
+    return seven_levels_taxonomy
 
 
 def fillTaxonomyLookup(tax_path):
@@ -63,8 +71,10 @@ def main():
     parser.add_argument('target', action='store', help='path to query genome to be compared to database')
     parser.add_argument('-database', '-d', action='store', help='path to genome database')
     parser.add_argument('-path_file', '-p', action='store', help='A Text file with the paths to genomes one per line')
-    parser.add_argument('-tax_lookup', '-t', action='store', help='Text file with accessions and associated taxonomy', default="/home/unhTW/share/mcbs913_2019/hash_group/documents/expanded_ncbi_taxonomy.tsv")
-    parser.add_argument('-divide_input', action='store_true', help='Classify each entry in FASTA/Q rather than entire file')
+    parser.add_argument('-tax_lookup', '-t', action='store', help='Text file with accessions and associated taxonomy',
+                        default="/home/unhTW/share/mcbs913_2019/hash_group/documents/expanded_ncbi_taxonomy.tsv")
+    parser.add_argument('-divide_input', action='store_true', help='Classify each entry in FAST/Q'
+                                                                   ' rather than entire file')
     args = parser.parse_args()
     target_genome_path = os.path.abspath(args.target)
 
@@ -74,38 +84,40 @@ def main():
     taxonomy_lookup = fillTaxonomyLookup(args.tax_lookup)
     print("Time", time.time() - start)
 
+
+    # Gather list of input genomes
+    directory_path = os.path.abspath(args.database)
+    print ('gathering list of input files')
+    start = time.time()
+    input_genomes = [x for x in os.listdir(directory_path) if x.endswith('.gz')]  # assumes gzipped fastas
+    print (len(input_genomes))
+    print (input_genomes[0])
+    print("Time", time.time() - start)
+    start = time.time()
+    input_genomes = glob.glob(directory_path+'/'+'*.gz')  # assumes gzipped fastas
+    print (len(input_genomes))
+    print (input_genomes[0])
+    print("Time", time.time() - start)
+
+
+
     # Sketch the input directory
     start = time.time()
     print("\nSketching starting database (this may take some time... unless its been done before)")
     BLAST.sketch_database(args.database)
     print("Time", time.time() - start)
 
-    def tax_from_file(name):
-        tax_id = name.split('_')[2]
-        taxonomy = taxonomy_lookup[tax_id]
-        seven_levels = [0, 1, 2, 5, 8, 10, 12, 13]
-        reduced_taxonomy = []
-        index = 0
-        for t in taxonomy.split(';'):
-            if index in seven_levels:
-                reduced_taxonomy.append(t)
-            index += 1
 
-        return reduced_taxonomy
-
-    total_references = 0
+    total_references = len(input_genomes)
 
     # fill database tree
     start = time.time()
     print("\nPopulating reference tree for filling sparse tree")
     database_tree = Tree()
-    directory_path = os.path.abspath(args.database)
-    for genome_file in [x for x in os.listdir(directory_path) if x.endswith('.gz')]:
-        total_references += 1
-        taxonomy_list = tax_from_file(genome_file)
+    for genome_file in input_genomes:
+        taxonomy_list = tax_from_file(genome_file, taxonomy_lookup)
         processQuery(taxonomy_list, 1, database_tree)
     print("Time", time.time() - start)
-    # Potential to multithread
 
     start = time.time()
     out_file = open('my_distances.txt', 'w')
@@ -142,7 +154,7 @@ def main():
                 # print (dist_t)
 
                 # Determine taxonomy data
-                reduced_taxonomy = tax_from_file(name)
+                reduced_taxonomy = tax_from_file(name, taxonomy_lookup)
 
                 # Add data to classifying tree
                 #print (reduced_taxonomy, distance)
@@ -160,9 +172,6 @@ def main():
     else:  # classify entire input as single query
         # as it stands this will only take the first hit of the assembly, which is usually the biggest contig.
         cur_tree = Tree()
-
-        # Multithread
-        directory_path = os.path.abspath(args.database)
         for genome in [directory_path + '/' + x for x in os.listdir(directory_path) if x.endswith('.gz')]:
             name = genome.split('/')[-1]
             distance, best_hit = BLAST.blast_file(target_genome_path, genome)
@@ -176,9 +185,13 @@ def main():
             # fill tree
             processQuery(reduced_taxonomy, distance, cur_tree)
 
+        print("Time", time.time() - start)
+
         # classify sequence
-        print("Classifying contig using maximum values")
+        start = time.time()
+        print("\nClassifying contig using maximum values")
         cur_tree.getMaxDistPath()
+        print("Time", time.time() - start)
 
     out_file.close()
 
