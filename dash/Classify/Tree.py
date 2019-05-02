@@ -201,7 +201,7 @@ class Tree:
         path = []
         distance = []
         nodeLookUpMap = {}
-        
+
         while len(node.getChildren()) != 0:
             # print(path);
             # print(len(node.getChildren()))
