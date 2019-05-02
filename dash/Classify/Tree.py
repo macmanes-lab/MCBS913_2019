@@ -77,10 +77,9 @@ class Tree:
         node = self.totalNodes.get(nodeName)
         node.addLeaf(leafName, leafNode)
 
-
     # add node to the tree. argument include the query list and the query list's distance
     def add(self,query,distance):
-        self.addHelper(0,query,self._root,distance)
+        self.addHelper(0, query, self._root, distance)
         querySize = len(query)
         # exe = ThreadPoolExecutor(max_workers=1)
         global leafName
@@ -142,7 +141,7 @@ class Tree:
             else:
                 node = childrenList.get(query[index])
                 childrenList = node.getChildren()
-                index +=1
+                index += 1
         return True
 
 
@@ -164,6 +163,26 @@ class Tree:
             print("No such element")
         else:
             return node.getDistance()
+
+    def getNodeByName(self, tax_path):
+        cur = ''
+        cur_node = self._root
+        index = 0
+        while cur != tax_path[-1]:
+            cur = tax_path[index]
+            cur_node = cur_node.getChildren()[cur]
+            index += 1
+        print (cur_node.getName())
+        return cur_node
+
+
+        node = self.totalNodes[name]
+        if node is None:
+            print("No such element")
+        else:
+            print ('THIS NODE', node)
+            return node
+
 
     # level order traversal. To go throught every node,
     # print out the children name which has highest distance value
@@ -301,7 +320,7 @@ class Tree:
                                     pickedList[k] = v
                                     left -= 1
                             elif childNode.leafSize() < tmp:
-                                left -= childNode.leafSize
+                                left -= childNode.leafSize()
 
                                 # re-assgin
                                 if count > 0:
@@ -329,7 +348,7 @@ class Tree:
                                 left -= 1
 
                         elif childNode.leafSize() < tmp:
-                            left -= childNode.leafSize
+                            left -= childNode.leafSize()
 
                             #re-assgin
 
@@ -362,6 +381,8 @@ class Tree:
 
     def findWinnerNode(self,leafDir):
 
+
+
         return None
 
     def findRightParent(self,root,leaf):
@@ -374,16 +395,26 @@ class Tree:
         return parent
 
 
-    def findPath(self):
+    def findPath(self, N):
         path = {}
         root = self._root
-        
-        #is the N fixed?
-        N = 15
-        while root.getLevel() != self.getLevel()-2 :
-            leafDir = self.randomPickHelper(root,N)
 
-            winnerNode = self.findWinnerNode(leafDir)
+
+        while root.getLevel() != self.getLevel()-2:
+            leafDir = self.randomPickHelper(root, N)
+
+            # genome_list = [path1, path2]
+            #
+            # classifiction_tree = Tree()
+            #
+            # genome_list = [path1, path2]
+            #
+            # for genome in genome_list:
+            #     distance, taxonomy = BLAST.blast_file(target_genome_path, genome)
+            #     processQuery(reduced_taxonomy, distance, cur_tree)
+            #
+
+            winnerNode = self.findWinnerNode(classifiction_tree)
 
             #find the parent right under root
             parentNode = self.findRightParent(root,winnerNode)
