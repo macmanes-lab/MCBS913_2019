@@ -200,6 +200,8 @@ class Tree:
         maxDistance = 0
         path = []
         distance = []
+        nodeLookUpMap = {}
+        
         while len(node.getChildren()) != 0:
             # print(path);
             # print(len(node.getChildren()))
@@ -210,13 +212,14 @@ class Tree:
                     maxDistance = v.getMaxDistance()
 
             path.append(node.getName())
+            nodeLookUpMap[node.getName()] = node
             distance.append(maxDistance)
             maxDistance = 0
         # print(node.getName())
 
         print(path);
         # print(distance)
-        return path
+        return path,nodeLookUpMap
 
     def generateLevel(self):
         q = Queue()
@@ -395,6 +398,8 @@ class Tree:
 
         return path
 
+
+    #reference:https://github.com/clemtoy/pptree
     def print_tree(self,current_node, childattr='_childrenList', nameattr='_name', indent='', last='updown'):
         if hasattr(current_node, nameattr):
             name = lambda node: getattr(node, nameattr)
