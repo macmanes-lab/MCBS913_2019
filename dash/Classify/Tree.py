@@ -166,6 +166,17 @@ class Tree:
             return node.getDistance()
     
 
+    def getNodeByName(self, tax_path):
+        cur = ''
+        cur_node = self._root
+        index = 0
+        while cur != tax_path[-1]:
+            cur = tax_path[index]
+            cur_node = cur_node.getChildren()[cur]
+            index += 1
+        print (cur_node.getName())
+        return cur_node
+
     # level order traversal. To go throught every node,
     # print out the children name which has highest distance value
     def getMaxDistFromChildren(self):
