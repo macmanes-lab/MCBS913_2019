@@ -173,7 +173,6 @@ class Tree:
             cur = tax_path[index]
             cur_node = cur_node.getChildren()[cur]
             index += 1
-        print (cur_node.getName())
         return cur_node
 
     # level order traversal. To go throught every node,
@@ -211,8 +210,6 @@ class Tree:
         maxDistance = 0
         path = []
         distance = []
-        nodeLookUpMap = {}
-
         while len(node.getChildren()) != 0:
             # print(path);
             # print(len(node.getChildren()))
@@ -223,14 +220,13 @@ class Tree:
                     maxDistance = v.getMaxDistance()
 
             path.append(node.getName())
-            nodeLookUpMap[node.getName()] = node
             distance.append(maxDistance)
             maxDistance = 0
         # print(node.getName())
 
         print(path);
         # print(distance)
-        return path,nodeLookUpMap
+        return path
 
     def generateLevel(self):
         q = Queue()
@@ -315,7 +311,7 @@ class Tree:
                                     pickedList[k] = v
                                     left -= 1
                             elif childNode.leafSize() < tmp:
-                                left -= childNode.leafSize
+                                left -= childNode.leafSize()
 
                                 # re-assgin
                                 if count > 0:
@@ -343,7 +339,7 @@ class Tree:
                                 left -= 1
 
                         elif childNode.leafSize() < tmp:
-                            left -= childNode.leafSize
+                            left -= childNode.leafSize()
 
                             #re-assgin
 

@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import os, sys
+import os, sys, glob
 import subprocess
 
 
@@ -26,18 +26,26 @@ class BLAST:
                 score = float(out_line.split('\t')[11]) # 11 = bitscore
         return score, out_line.split('\t')
 
-    def sketch_database(directory): # makes a blast database for all files, skips ones done
+    def sketch_database(directory):  # makes a blast database for all files, skips ones done
         directory_path = os.path.abspath(directory)
         sketched = 0
         already_sketched = 0
         # change this to path.join and os.scandir
+
+        completed_genomes = []
+        for file in [directory_path + '/' + x for x in os.listdir(directory_path)]:
+            if file.endswith('.nhr'):
+                if file.endswith('00.nhr'):
+                    completed_genomes.append(file[:-7])
+                else:
+                    completed_genomes.append(file[:-4])
         for file in [directory_path + '/' + x for x in os.listdir(directory_path) if x.endswith('fna.gz')]:
-            if not file +'.nhr' in [directory_path + '/' + x for x in os.listdir(directory_path)]:
+            if not file in completed_genomes:
                 sketched += 1
                 print('Making BLAST db', file)
                 abs_file = os.path.abspath(file)
                 path, base_file, = os.path.split(abs_file)
-                out = subprocess.run('gunzip -c {} | makeblastdb -in - -dbtype nucl -out {} -title {}'.format(abs_file, abs_file, file ), shell=True, stdout=subprocess.PIPE)
+                out = subprocess.run('gunzip -c {} | makeblastdb -in - -dbtype nucl -out {} -title {}'.format(abs_file, abs_file, file), shell=True, stdout=subprocess.PIPE)
         print ('Sketched', sketched, 'files')
 
 if __name__ == '__main__':

@@ -68,7 +68,7 @@ def classify_sequenceByName(name):
     print(k,score,sorted(distanceList,reverse=True))
 
 
-def pickNode(query_seq, genome_list, curTree, out_file, taxonomy_lookup, header):
+def pickNode(query_seq, genome_list, curTree, out_file, taxonomy_lookup, header, blast_lookup):
     start = time.time()
     completed = 0
     for genome in genome_list:
@@ -76,8 +76,15 @@ def pickNode(query_seq, genome_list, curTree, out_file, taxonomy_lookup, header)
         if completed % 100 == 0:
             print("Finished BLASTING {} genomes".format(completed))
         name = genome.split('/')[-1]
-        distance, best_hit = BLAST.blast_file(query_seq, genome)
 
+        if genome not in blast_lookup.keys():
+            distance, best_hit = BLAST.blast_file(query_seq, genome)
+            blast_lookup[genome] = [distance, best_hit]
+        else:
+
+            print ("\nTHIS ONE HAS ALREADY BEEN DONE!!!!\n")
+
+            distance, best_hit = blast_lookup[genome]
         # Determine taxonomy data
         reduced_taxonomy = tax_from_file(name, taxonomy_lookup)
         print(genome, distance, '\n', reduced_taxonomy)
@@ -122,8 +129,6 @@ def main():
     print ('gathering list of input files')
     start = time.time()
     input_genomes = [x for x in os.listdir(directory_path) if x.endswith('.gz')]  # assumes gzipped fastas
-    print (len(input_genomes))
-    print (input_genomes[0])
     print("Time", time.time() - start)
     start = time.time()
     input_genomes = glob.glob(directory_path+'/'+'*.gz')  # assumes gzipped fastas
@@ -160,6 +165,7 @@ def main():
     seq_count = 0
     if args.divide_input:
         for seq_record in SeqIO.parse(target_genome_path, "fasta"):
+            completed_blasts = {}
             seq_count += 1
             start = time.time()
             cur_tree = Tree()
@@ -181,6 +187,7 @@ def main():
             class_level = 0
             print('Selecting {} comparisons to make each run'.format(args.num_searches))
             while class_level < 5:
+                cur_tree.print_tree(curNode)
                 #choice = database_tree.randomPick(args.num_searches)
                 choice = database_tree.randomPickHelper(curNode, args.num_searches)
                 filepaths = []
@@ -188,7 +195,7 @@ def main():
                     b_filename = file_lookup[c]
                     filepaths.append(b_filename)
 
-                winningNode = pickNode(temp_file, filepaths, cur_tree, out_file, taxonomy_lookup, header)
+                winningNode = pickNode(temp_file, filepaths, cur_tree, out_file, taxonomy_lookup, header, completed_blasts)
                 print('WINNER', winningNode)
                 selection = winningNode[:class_level + 1]
                 print ('Using', selection)
@@ -203,7 +210,7 @@ def main():
             for c in choice.keys():
                 b_filename = file_lookup[c]
                 filepaths.append(b_filename)
-            winningNode = pickNode(temp_file, filepaths, cur_tree, out_file, taxonomy_lookup, header)
+            winningNode = pickNode(temp_file, filepaths, cur_tree, out_file, taxonomy_lookup, header, blast_lookup)
             print ('FINAL RESULTS', winningNode)
 
             sys.exit()
@@ -211,27 +218,8 @@ def main():
             os.remove(temp_file)
     else:  # classify entire input as single query
         # as it stands this will only take the first hit of the assembly, which is usually the biggest contig.
-        cur_tree = Tree()
-        for genome in [directory_path + '/' + x for x in os.listdir(directory_path) if x.endswith('.gz')]:
-            name = genome.split('/')[-1]
-            distance, best_hit = BLAST.blast_file(target_genome_path, genome)
+        print ('SORRY USE --divide')
 
-            # Determine taxonomy data
-            reduced_taxonomy = tax_from_file(name, taxonomy_lookup)
-
-            # Write data to output
-            out_file.writelines(target_genome_path + '\t' + genome + '\t' + ':'.join(reduced_taxonomy) + '\t' + str(distance) + '\n')
-
-            # fill tree
-            processQuery(reduced_taxonomy, distance, cur_tree)
-
-        print("Time", time.time() - start)
-
-        # classify sequence
-        start = time.time()
-        print("\nClassifying contig using maximum values")
-        cur_tree.getMaxDistPath()
-        print("Time", time.time() - start)
 
     out_file.close()
 
