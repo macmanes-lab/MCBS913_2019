@@ -4,6 +4,7 @@ class Node:
     def __init__(self, name):
         self._name = name
         self._children = {}
+        self._childrenList = []
         self._distance = []
         self._leaf = {}
         self._level = 0
@@ -11,6 +12,7 @@ class Node:
     # store the instance's child in a dictonary
     def addChild(self, key,value):
         self._children[key] = value
+        self._childrenList.append(value)
 
     def addLeaf(self,leafName, leaf):
         self._leaf[leafName] = leaf

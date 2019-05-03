@@ -164,6 +164,7 @@ class Tree:
             print("No such element")
         else:
             return node.getDistance()
+    
 
     def getNodeByName(self, tax_path):
         cur = ''
