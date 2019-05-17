@@ -1,0 +1,108 @@
+###Used to filter the original database 
+###Filtered it down to only Bacteria- filtered out Eukaryotes and Viruses
+
+"""
+%prog some.fasta wanted-list.txt
+"""
+from Bio import SeqIO
+import sys
+
+wanted = [line.strip() for line in open(sys.argv[2])]
+seqiter = SeqIO.parse(open(sys.argv[1]), 'fasta')
+SeqIO.write((seq for seq in seqiter if seq.id in wanted), sys.stdout, "fasta")
+
+
+
+
+
+
+###Script used to subsample the large 6500 genome database down to 1000 genomes
+
+import sys,random
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import generic_protein
+
+# Use: python   scriptname.py   number_of_random_seq   infile.fasta   outfile.fasta
+
+infile = sys.argv[2]                                #Name of the input file
+seq = list(SeqIO.parse(infile,"fasta"))             #Create a list with all the sequence records
+print "Input fasta file = ", infile
+
+totseq = len(seq)                                   #Total number of sequences in the input file
+print "Number of sequences in the original file = ", totseq
+
+numrandseq = int(sys.argv[1])                       #Number of random sequences desired
+print "Number of random sequences desired = ", numrandseq
+
+if numrandseq > totseq:
+  print "The requested number of random sequences is greater that the total number of input sequences. Exiting."
+  exit()
+
+outfile = sys.argv[3]                               #Name of the output file
+print "Output fasta file = ", outfile
+
+outrandseqset = []
+i = 1
+for i in range(numrandseq):                         #Create a list of random sequence record numbers for output
+  choice = random.randint(1,totseq)
+  outrandseqset.append(choice)
+
+i = 1
+j = 1
+duplicate = 1
+while duplicate:                                    #Make sure no sequences are duplicated in the list
+    duplicate = 0
+    for i in range(numrandseq):
+      for j in range(i+1, numrandseq):
+        if outrandseqset[i] == outrandseqset[j]:
+            outrandseqset[j] = random.randint(1,totseq)
+            duplicate = 1
+
+
+i = 1
+print "Randomly chosen output sequences:"
+for i in range(numrandseq):
+  print outrandseqset[i]
+
+outlist = []
+i = 1
+for i in range(numrandseq):                         #Create the list of seq records to be written to the output file
+  seqnum = outrandseqset[i]
+  outseq = seq[seqnum]
+  outlist.append(outseq)
+
+SeqIO.write(outlist, outfile, "fasta")              #Write the output list to the outfile
+
+exit()
+
+
+
+
+
+
+
+
+
+### Commands to use in kallisto
+
+## Used to create index of reference database
+
+kallisto index -i repdb_bac_index repdb_bac_sub. ## -i Filename for created index 
+
+## Used to quantify metagenomic reads piped into samtools to create SAM file from --pseudobam option
+
+kallisto quant -i /home/unhTW/share/mcbs913_2019/align_group/reference/repdb_bac_index -o /home/unhTW/share/mcbs913_2019/align_group/kallisto_sam/art/ -b --plaintext --single -l 200 -s 10 --pseudobam /home/unhTW/share/mcbs913_2019/align_group/ny/ART/simulate_0507.fq | samtools view -S - > art.sam
+
+# -i Index file to use
+# -o output directory
+# -b --plaintext Output plain text file instead of HDF5 File
+# --sinlge single end reads
+# -l estimated fragment length
+# -s standard deviation of fragment length
+# fastq file to be analyzed
+
+
+
+
