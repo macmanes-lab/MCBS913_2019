@@ -1,0 +1,19 @@
+## command line for Kaiju
+
+git clone https://github.com/bioinformatics-centre/kaiju.git
+
+cd kaiju/src
+
+#make database
+cd kaiju/bin
+./makeDB.sh -r
+### -r: Completely assembled and annotated reference genomes of Archaea, Bacteria, and viruses from the NCBI RefSeq database.
+### -p Representative set of genomes from the proGenomes database and viruses from the NCBI RefSeq database.
+
+# run Kaiju
+./kaiju/bin/kaiju -z 32 -t nodes.dmp -f kaiju_db.fmi -i ERR2935851.fastq -o 5851_mem.out -a mem
+### -a mem : maximum exact matches
+### default: greedy 3
+
+#make summary file
+kaiju/bin/kaijuReport -t nodes.dmp -n names.dmp -i 5851_mem.out -r species -o 5850_mem.out.summary

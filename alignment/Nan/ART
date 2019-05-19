@@ -1,0 +1,16 @@
+### download 8 species genome
+wget ftp://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_refseq.txt
+
+grep -E 'GCF_000005845.2' assembly_summary_refseq.txt | cut -f 20 > ecoli.txt
+# and other 7 species. combine 8 txt files to ftp_folder.txt
+
+awk 'BEGIN{FS=OFS="/";filesuffix="genomic.fna.gz"}{ftpdir=$0;asm=$10;file=asm"_"filesuffix;print "wget "ftpdir,file}' ftp_folder.txt > download_fna_files.sh
+
+source download_fna_files.sh 
+
+gzip -d *.gz
+
+cat GCF_000005845.2_ASM584v2_genomic.fna GCF_000007785.1_ASM778v1_genomic.fna GCF_000010145.1_ASM1014v1_genomic.fna GCF_000195995.1_ASM19599v1_genomic.fna GCF_000006765.1_ASM676v1_genomic.fna GCF_000009045.1_ASM904v1_genomic.fna GCF_000146045.2_R64_genomic.fna GCF_000196035.1_ASM19603v1_genomic.fna > art.fasta
+
+### ART
+art_illumina -ss HS20 -sam -i art.fasta -l 100 -f 10 -o art_simulate
