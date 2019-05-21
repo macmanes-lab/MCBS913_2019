@@ -1,0 +1,32 @@
+### Generate a new index based on specific reference
+### The output is a fasta file
+
+## Use "bowtie2-build" command to create a index "a"
+
+bowtie2-build "/home/unhTW/users/cp1153/fasta/a.fa" a
+
+
+### Alignment by bowtie2
+
+## Use "bowtie2" command to align
+## Use "time" command to display the usertime and system time
+
+time bowtie2 --local -x a -U "/home/unhTW/users/cp1153/a.fastq" -S a.sam -p 32
+
+# --local In this mode, Bowtie 2 does not require that the entire read align from one end to the other.
+# -x The basename of the index for the reference genome.
+# -U Comma-separated list of files containing unpaired reads to be aligned.
+# -S File to write SAM alignments to.
+# -p Launch NTHREADS parallel search threads.
+
+
+### Split the paired reads to forward reads and reverse reads by fastq-dump
+
+fastq-dump --split-files "/home/unhTW/users/cp1153/Download/a"
+
+
+### Do alignment with both forward reads and reverse reads
+
+time bowtie2 --local -x a -1 "/home/unhTW/users/cp1153/a1.fastq" -2 "/home/unhTW/users/cp1153/a2.fastq" -S a.sam -p 32
+
+# -1 -2 Comma-separated list of files containing mate 1s and 2s
