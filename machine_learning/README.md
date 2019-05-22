@@ -1,4 +1,1 @@
-This is the folder for the Machine Learning group. You may make notes, add reminders, etc here. 
-
-- [x] This is the 1st completed task
-- [ ] This is the 1st un-completed task
+For the instructions about setup and execution of RandomForest algorithm, please refer to setup file in the RandomForest folder.
