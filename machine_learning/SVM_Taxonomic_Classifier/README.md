@@ -1,6 +1,5 @@
 
 # Taxonomic Classification of DNA Sequences using Support Vector Machines
-***
 **Author:** William Rivera  
 **Course:** MCBS 913 | Applied Bioinformatics  
 **Professors:** Matthew MacManes, Anthony Westbrook  
@@ -8,11 +7,9 @@
 **Date:** May 21, 2019
 
 ## Overview
-***
 This is a first foray for this investigator into using support vector machines (SVMs). The primary goal of this project was to investigate a potential computational method for classifying short (100-250bp) next-gen sequencing (NGS)  reads based on their sequence data alone. Given the challenges in generating features about the sequences beyond characteristics such as GC content and k-mer frequency distributions, utilizing a machine learning (ML) algorithm to classify the sequences seemed a viable option. Out of the candidate ML algorithms considered, I decided to explore support vector machines as there was not a lot of literature that appeared to explore the use of SVMs on biological sequence data. As this project represents a proof of concept and not a finished product, recommendations for future improvements are made throughout.
 
 ### Brief Support Vector Machine Theory
-***
 
 Support vector machines are a class of machine learning algorithm frequently used in classification tasks, particularly those that lend themselves to linear and logistic regression analysis. 
 
@@ -48,7 +45,6 @@ The degree of a polynomial kernel function determines how flexible the decision 
 [Support Vector Machine Lecture Notes (by Andrew Ng of Stanford)](http://cs229.stanford.edu/notes/cs229-notes3.pdf)  
 
 ### Data Preparation and Feature Extraction
-***
 #### Data Acquistion
 Genomic data (in the form of .fna files) for analysis was downloaded from the NCBI FTP Server at ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria/ using `wget`.
 
@@ -79,7 +75,6 @@ While a trivial calculation to perform, GC content has revealed itself to be a d
 
 
 ## Getting Started
-***
 Now that we've touched on most of the relevant background information and general process, let's move onto actual machine learning! These instructions will walk you through the installation and deployment process for training and running an SVM Classifier using the sci-kit learn library.
 
 ### Requirements
@@ -214,12 +209,10 @@ While better than random or chance-based success was seen in using SVMs, the nee
 Deep learning techniques likely would have produced the best results as they have historically done better with sequence data and offer significant performance benefits when dealing with training sets comprising large numbers of samples but limited feature data. [2] As we were able to achieve reasonable classification results using an SVM, exploring how a neural network would perform on the same task feels like a reasonable extension of this work, which could prove quite helpful in metagenomic analysis as it would remove the need to rely on more specific stretches of genetic material such as 16S rRNA.
 
  ## Acknowledgements
- ***
  + I would like to thank my fellow ML group members, Pooja Oza and Amanda Tellier, for their assistance in code reviews, statistical theory discussion, and general support throughout our work on this project.
  + Thanks are also in order to professors Matt MacManes and Toni Westbrook, for their guidance and inspiring conversations while tackling some of the challenges associated with this project.
 
 ## References
-***
 1. Gandhi, R., & Gandhi, R. (2018, June 07). Support Vector Machine - Introduction to Machine Learning Algorithms. Retrieved from https://towardsdatascience.com/support-vector-machine-introduction-to-machine-learning-algorithms-934a444fca47 
 2. Goodfellow, I., Bengio, Y., & Courville, A. (2016). Deep learning. Cambridge (EE. UU.): MIT Press.
 3. Guillaume, & Carl. (2011, January 07). Fast, lock-free approach for efficient parallel counting of occurrences of k -mers. Retrieved from https://academic.oup.com/bioinformatics/article/27/6/764/234905
