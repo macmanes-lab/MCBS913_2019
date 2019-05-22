@@ -1,0 +1,23 @@
+Setup Instructions:
+
+
+(1) dna2vec
+Please refer to the setup instructions at https://github.com/pnpnpn/dna2vec
+In case if there is any numpy conflict, remove the numpy requirement from the requirements.txt and rerun the file.
+
+(2) Execute the requirements.txt of RandomForest to setup the required packages
+
+(2) Once the environment is setup, change the path of the dna2vec folder in RandomForest/venv/src/IO/IOFile.py to point to the dna2vec folder
+
+(3) To execute the randomforest, fastq files are required. The main script to be called is RandomForest/venv/src/index.py. To execute the script, go to RandomForest/vnevn/src folder and type the following command:
+
+python3 index.py --nargs /home/unhTW/share/mcbs913_2019/ml_group/single_dat_bs150.fq /home/unhTW/share/mcbs913_2019/ml_group/single_dat_lm150.fq /home/unhTW/share/mcbs913_2019/ml_group/single_dat_ef150.fq /home/unhTW/share/mcbs913_2019/ml_group/single_dat_sa150.fq /home/unhTW/share/mcbs913_2019/ml_group/single_dat_se150.fq -k 30
+
+The above command takes the fastq files as input in nargs argument, -k takes the kmerlength for the most frequently occuring kmers.
+On executing the above command, it will generate a randomforest model file with the name 'randomForest_model_30kmerlen_50freq_10estimators.sav'
+
+python3 index.py --nargs /home/unhTW/share/mcbs913_2019/ml_group/single_dat_bs150.fq /home/unhTW/share/mcbs913_2019/ml_group/single_dat_lm150.fq /home/unhTW/share/mcbs913_2019/ml_group/single_dat_ef150.fq /home/unhTW/share/mcbs913_2019/ml_group/single_dat_sa150.fq /home/unhTW/share/mcbs913_2019/ml_group/single_dat_se150.fq -k 30 -model /home/unhTW/users/pho1003/random_forest_models/randomForest_model_30kmerlen_10freq.sav
+
+The above command takes fastq files as input in nargs argument, -k takes the kmerlength for the most frequently occuring kmers and the random forest model file.
+
+Please make sure the model given has exactly same number of features as the features getting generated in the code. Also the number of top most frequently occurring kmers is same. If any change needs to be done, please go to the file RandomForest/venv/src/IO/IOFile.py and change the code in readinputfile function.
