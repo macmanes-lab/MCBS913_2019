@@ -1,0 +1,6 @@
+domain,d_encoding,phylum,p_encoding,class,c_encoding,order,o_encoding,family,f_encoding,genus,g_encoding,species,s_encoding,hierarchical_encoding
+Bacteria,0,Firmicites,0,Bacilli,0,Bacillales,0,Bacillaceae,0,Bacillus,0,B. subtilis,0,"0,0,0,0,0,0,0"
+Archaea,1,Proteobacteria,1,Gammaproteobacteria,1,Lactobacillales,1,Enterococcaceae,1,Listeria,1,L. monocytogenes,1,"0,0,0,0,0,1,1"
+Eukarya,2,,,,,Enterobacteriales,2,Staphylococcaceae,2,Enterococcus,2,E. faecalis,2,"0,0,0,1,1,2,2"
+,,,,,,,,Enterobacteriaceae,3,Staphylococcus,3,S. aureus,3,"0,0,0,0,2,3,3"
+,,,,,,,,,,Salmonella,4,S. enterica,4,"0,1,1,2,3,4,4"
